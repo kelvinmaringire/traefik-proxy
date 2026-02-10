@@ -1,0 +1,40 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy on VPS (Traefik stack)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            cd /root/srv/traefik-proxy
+
+            echo "Updating code"
+            git fetch origin
+            git reset --hard origin/main
+
+            echo "Ensuring traefik_net exists"
+            docker network create traefik_net 2>/dev/null || true
+
+            echo "Pulling images"
+            docker compose pull
+
+            echo "Starting Traefik"
+            docker compose up -d
+
+            echo "Cleanup"
+            docker system prune -f
