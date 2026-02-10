@@ -8,4 +8,26 @@ Use a **single** Cloudflare API token in `.env` as `CF_DNS_API_TOKEN`. The conta
 
 ```bash
 docker network create traefik_net
+
+chmod 600 ./data/certs/cloudflare-acme.json
+chown root:root ./data/certs/cloudflare-acme.json
+
+
+```
+
+
+## Clone and Setup Treafik Project
+
+```bash
+mkdir -p ~/srv
+
+cd ~/srv
+
+sudo git clone https://github.com/kelvinmaringire/traefik-proxy.git
+
+cd traefik-proxy
+
+nano .env   # (paste your environment variables here)
+
+docker compose up -d
 ```
