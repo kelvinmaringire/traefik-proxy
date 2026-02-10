@@ -1,0 +1,27 @@
+services:
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Traefik dashboard
+    environment:
+      # Lego/ACME expects CLOUDFLARE_DNS_API_TOKEN (or CF_DNS_API_TOKEN). Use one token with Zone:DNS:Edit for all zones.
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./data/certs:/var/traefik/certs
+    networks:
+      - traefik_net
+    restart: unless-stopped
+
+networks:
+  traefik_net:
+    external: true
